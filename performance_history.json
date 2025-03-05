@@ -1,0 +1,435 @@
+[
+  {
+    "timestamp": "2025-03-05T02:20:06.407776",
+    "insertion_rates": [],
+    "retrieval_rates": [],
+    "query_rates": [],
+    "concurrent_rates": [],
+    "database_sizes": [],
+    "average_response_times": {}
+  },
+  {
+    "timestamp": "2025-03-05T02:20:08.362941",
+    "insertion_rates": [],
+    "retrieval_rates": [],
+    "query_rates": [],
+    "concurrent_rates": [],
+    "database_sizes": [],
+    "average_response_times": {}
+  },
+  {
+    "timestamp": "2025-03-05T02:20:13.634529",
+    "insertion_rates": [
+      {
+        "batch_size": 10,
+        "rate": 765.0488837005691
+      },
+      {
+        "batch_size": 10,
+        "rate": 3339.4140127388537
+      },
+      {
+        "batch_size": 100,
+        "rate": 1426.8718255763715
+      },
+      {
+        "batch_size": 100,
+        "rate": 11812.278923059592
+      },
+      {
+        "batch_size": 1000,
+        "rate": 1621.6438580727577
+      },
+      {
+        "batch_size": 1000,
+        "rate": 43169.48507086322
+      }
+    ],
+    "retrieval_rates": [],
+    "query_rates": [],
+    "concurrent_rates": [],
+    "database_sizes": [],
+    "average_response_times": {}
+  },
+  {
+    "timestamp": "2025-03-05T02:20:15.876485",
+    "insertion_rates": [],
+    "retrieval_rates": [],
+    "query_rates": [],
+    "concurrent_rates": [],
+    "database_sizes": [],
+    "average_response_times": {}
+  },
+  {
+    "timestamp": "2025-03-05T02:20:16.946973",
+    "insertion_rates": [],
+    "retrieval_rates": [],
+    "query_rates": [],
+    "concurrent_rates": [],
+    "database_sizes": [],
+    "average_response_times": {}
+  },
+  {
+    "timestamp": "2025-03-05T02:21:26.772592",
+    "insertion_rates": [],
+    "retrieval_rates": [],
+    "query_rates": [],
+    "concurrent_rates": [],
+    "database_sizes": [],
+    "average_response_times": {}
+  },
+  {
+    "timestamp": "2025-03-05T02:21:28.691085",
+    "insertion_rates": [],
+    "retrieval_rates": [],
+    "query_rates": [],
+    "concurrent_rates": [],
+    "database_sizes": [],
+    "average_response_times": {}
+  },
+  {
+    "timestamp": "2025-03-05T02:21:33.944745",
+    "insertion_rates": [
+      {
+        "batch_size": 10,
+        "rate": 833.1950735001986
+      },
+      {
+        "batch_size": 10,
+        "rate": 3110.117158534777
+      },
+      {
+        "batch_size": 100,
+        "rate": 1284.020400791051
+      },
+      {
+        "batch_size": 100,
+        "rate": 14908.840152134504
+      },
+      {
+        "batch_size": 1000,
+        "rate": 1606.4916864144088
+      },
+      {
+        "batch_size": 1000,
+        "rate": 44758.339558211504
+      }
+    ],
+    "retrieval_rates": [],
+    "query_rates": [],
+    "concurrent_rates": [],
+    "database_sizes": [],
+    "average_response_times": {}
+  },
+  {
+    "timestamp": "2025-03-05T02:21:36.234083",
+    "insertion_rates": [],
+    "retrieval_rates": [],
+    "query_rates": [],
+    "concurrent_rates": [],
+    "database_sizes": [],
+    "average_response_times": {}
+  },
+  {
+    "timestamp": "2025-03-05T02:21:37.366920",
+    "insertion_rates": [],
+    "retrieval_rates": [],
+    "query_rates": [],
+    "concurrent_rates": [],
+    "database_sizes": [],
+    "average_response_times": {}
+  },
+  {
+    "timestamp": "2025-03-05T02:24:37.838122",
+    "insertion_rates": [],
+    "retrieval_rates": [],
+    "query_rates": [],
+    "concurrent_rates": [
+      1916.286639072738
+    ],
+    "database_sizes": [],
+    "average_response_times": {}
+  },
+  {
+    "timestamp": "2025-03-05T02:24:38.889209",
+    "insertion_rates": [],
+    "retrieval_rates": [],
+    "query_rates": [],
+    "concurrent_rates": [],
+    "database_sizes": [],
+    "average_response_times": {}
+  },
+  {
+    "timestamp": "2025-03-05T02:24:43.101633",
+    "insertion_rates": [
+      {
+        "batch_size": 10,
+        "rate": 287.6061302156547
+      },
+      {
+        "batch_size": 10,
+        "rate": 3644.05212858384
+      },
+      {
+        "batch_size": 100,
+        "rate": 457.6616211875207
+      },
+      {
+        "batch_size": 100,
+        "rate": 25768.286539288565
+      },
+      {
+        "batch_size": 1000,
+        "rate": 583.0403978510527
+      },
+      {
+        "batch_size": 1000,
+        "rate": 29964.236981789865
+      }
+    ],
+    "retrieval_rates": [],
+    "query_rates": [],
+    "concurrent_rates": [],
+    "database_sizes": [],
+    "average_response_times": {}
+  },
+  {
+    "timestamp": "2025-03-05T02:24:45.395574",
+    "insertion_rates": [],
+    "retrieval_rates": [],
+    "query_rates": [],
+    "concurrent_rates": [],
+    "database_sizes": [],
+    "average_response_times": {}
+  },
+  {
+    "timestamp": "2025-03-05T02:24:45.433106",
+    "insertion_rates": [],
+    "retrieval_rates": [],
+    "query_rates": [],
+    "concurrent_rates": [],
+    "database_sizes": [],
+    "average_response_times": {}
+  },
+  {
+    "timestamp": "2025-03-05T02:33:01.327069",
+    "insertion_rates": [],
+    "retrieval_rates": [],
+    "query_rates": [],
+    "concurrent_rates": [
+      2702.6930893654094
+    ],
+    "database_sizes": [],
+    "average_response_times": {}
+  },
+  {
+    "timestamp": "2025-03-05T02:33:02.075931",
+    "insertion_rates": [],
+    "retrieval_rates": [],
+    "query_rates": [],
+    "concurrent_rates": [],
+    "database_sizes": [],
+    "average_response_times": {}
+  },
+  {
+    "timestamp": "2025-03-05T02:33:02.116326",
+    "insertion_rates": [
+      {
+        "batch_size": 10,
+        "rate": 187.87307616505115
+      },
+      {
+        "batch_size": 10,
+        "rate": 4087.61719130689
+      },
+      {
+        "batch_size": 100,
+        "rate": 611.5946678176373
+      },
+      {
+        "batch_size": 100,
+        "rate": 20805.079365079364
+      },
+      {
+        "batch_size": 1000,
+        "rate": 596.8097042135781
+      },
+      {
+        "batch_size": 1000,
+        "rate": 34253.197223356474
+      }
+    ],
+    "retrieval_rates": [],
+    "query_rates": [],
+    "concurrent_rates": [],
+    "database_sizes": [],
+    "average_response_times": {}
+  },
+  {
+    "timestamp": "2025-03-05T02:33:04.150440",
+    "insertion_rates": [],
+    "retrieval_rates": [],
+    "query_rates": [],
+    "concurrent_rates": [],
+    "database_sizes": [],
+    "average_response_times": {}
+  },
+  {
+    "timestamp": "2025-03-05T02:33:04.188391",
+    "insertion_rates": [],
+    "retrieval_rates": [],
+    "query_rates": [],
+    "concurrent_rates": [],
+    "database_sizes": [],
+    "average_response_times": {}
+  },
+  {
+    "timestamp": "2025-03-05T02:40:49.031566",
+    "insertion_rates": [],
+    "retrieval_rates": [],
+    "query_rates": [],
+    "concurrent_rates": [],
+    "database_sizes": [],
+    "average_response_times": {}
+  },
+  {
+    "timestamp": "2025-03-05T02:44:01.465654",
+    "insertion_rates": [],
+    "retrieval_rates": [],
+    "query_rates": [],
+    "concurrent_rates": [],
+    "database_sizes": [],
+    "average_response_times": {}
+  },
+  {
+    "timestamp": "2025-03-05T02:44:37.965340",
+    "insertion_rates": [],
+    "retrieval_rates": [],
+    "query_rates": [],
+    "concurrent_rates": [],
+    "database_sizes": [],
+    "average_response_times": {}
+  },
+  {
+    "timestamp": "2025-03-05T02:44:38.009587",
+    "insertion_rates": [
+      {
+        "batch_size": 10,
+        "rate": 147.1995507826209
+      },
+      {
+        "batch_size": 10,
+        "rate": 6210.1036422860525
+      },
+      {
+        "batch_size": 100,
+        "rate": 200.96334673151586
+      },
+      {
+        "batch_size": 100,
+        "rate": 89468.94197952219
+      },
+      {
+        "batch_size": 1000,
+        "rate": 224.10144851263044
+      },
+      {
+        "batch_size": 1000,
+        "rate": 619634.2148027774
+      }
+    ],
+    "retrieval_rates": [],
+    "query_rates": [],
+    "concurrent_rates": [],
+    "database_sizes": [],
+    "average_response_times": {}
+  },
+  {
+    "timestamp": "2025-03-05T02:44:43.271603",
+    "insertion_rates": [],
+    "retrieval_rates": [],
+    "query_rates": [],
+    "concurrent_rates": [],
+    "database_sizes": [],
+    "average_response_times": {}
+  },
+  {
+    "timestamp": "2025-03-05T02:44:43.316740",
+    "insertion_rates": [],
+    "retrieval_rates": [],
+    "query_rates": [],
+    "concurrent_rates": [],
+    "database_sizes": [],
+    "average_response_times": {}
+  },
+  {
+    "timestamp": "2025-03-05T02:46:03.180941",
+    "insertion_rates": [],
+    "retrieval_rates": [],
+    "query_rates": [],
+    "concurrent_rates": [],
+    "database_sizes": [],
+    "average_response_times": {}
+  },
+  {
+    "timestamp": "2025-03-05T02:46:10.044885",
+    "insertion_rates": [],
+    "retrieval_rates": [],
+    "query_rates": [],
+    "concurrent_rates": [],
+    "database_sizes": [],
+    "average_response_times": {}
+  },
+  {
+    "timestamp": "2025-03-05T02:46:19.293586",
+    "insertion_rates": [
+      {
+        "batch_size": 10,
+        "rate": 203.5664746336894
+      },
+      {
+        "batch_size": 10,
+        "rate": 1044.814667198087
+      },
+      {
+        "batch_size": 100,
+        "rate": 299.76293714939965
+      },
+      {
+        "batch_size": 100,
+        "rate": 6254.554130629287
+      },
+      {
+        "batch_size": 1000,
+        "rate": 274.5915795400237
+      },
+      {
+        "batch_size": 1000,
+        "rate": 58112.975406996884
+      }
+    ],
+    "retrieval_rates": [],
+    "query_rates": [],
+    "concurrent_rates": [],
+    "database_sizes": [],
+    "average_response_times": {}
+  },
+  {
+    "timestamp": "2025-03-05T02:46:23.415178",
+    "insertion_rates": [],
+    "retrieval_rates": [],
+    "query_rates": [],
+    "concurrent_rates": [],
+    "database_sizes": [],
+    "average_response_times": {}
+  },
+  {
+    "timestamp": "2025-03-05T02:46:23.474841",
+    "insertion_rates": [],
+    "retrieval_rates": [],
+    "query_rates": [],
+    "concurrent_rates": [],
+    "database_sizes": [],
+    "average_response_times": {}
+  }
+]
