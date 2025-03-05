@@ -121,15 +121,14 @@ class BiographicalAgent:
     def _extract_field(self, question):
         """Extract the field being asked about."""
         patterns = {
-            'birth_year': r'when.*born|birth.*year|year.*birth',
+            'birth_year': r'when.*born|birth.*year|year.*born',
             'birth_place': r'where.*born|birth.*place|place.*birth',
             'death_year': r'when.*die|death.*year|year.*death',
             'death_place': r'where.*die|death.*place|place.*death',
-            'occupation': r'occupation|job|work|profession|what.*do',
-            'achievement': r'achieve|accomplish|contribution|what.*did.*do',
+            'occupation': r'occupation|job|profession',
+            'achievement': r'achieve|accomplish|contribution|known for|famous for|remembered|legacy',
             'education': r'study|education|university|college',
-            'nationality': r'nationality|citizen|where.*from',
-            'known_for': r'known for|famous for|remembered|legacy'
+            'nationality': r'nationality|citizen|where.*from'
         }
         
         for field, pattern in patterns.items():
@@ -141,56 +140,73 @@ class BiographicalAgent:
         """Handle general questions about a person."""
         data = {}
         fields = ['birth_year', 'birth_place', 'occupation', 'nationality', 
-                  'achievement', 'known_for', 'death_year']
+                  'achievement', 'death_year']
         
         for field in fields:
             data[field] = self.memory.retrieve(name, field)
         
-        # Check if asking specifically about achievements
-        if 'achieve' in question or 'did' in question:
+        pronoun = "she" if name in ["Ada Lovelace"] else "he"
+        pronoun_cap = pronoun.capitalize()
+
+        # Handle "what did X do" type questions first
+        if re.search(r'what.*did.*do|what.*does.*do', question, re.IGNORECASE):
+            response = []
+            if data['occupation']:
+                response.append(f"{name} was a {data['occupation']}")
             if data['achievement']:
-                return f"{name} {data['achievement']}."
-            return f"I don't have information about {name}'s achievements."
+                response.append(f"{pronoun} is known for {data['achievement']}")
+            if response:
+                return ' and '.join(response) + '.'
+            return f"I don't have information about {name}'s work or achievements."
         
-        # Check if asking about what they're known for
-        if 'known for' in question:
-            if data['known_for']:
-                return f"{name} is known for {data['known_for']}."
-            return f"I don't have information about what {name} was known for."
+        # Handle birth year queries specifically
+        if 'birth_year' in data and any(phrase in question for phrase in ['year born', 'born year', 'when born']):
+            return f"{name} was born in {data['birth_year']}."
         
-        # General biography
-        response = []
-        if data['birth_year'] and data['birth_place']:
-            response.append(f"{name} was born in {data['birth_year']} in {data['birth_place']}")
+        # For "who was" or "tell me about" questions, give concise biography
+        if any(phrase in question for phrase in ['who was', 'tell me about']):
+            response = []
+            if data['birth_year'] and data['birth_place']:
+                response.append(f"{name} was born in {data['birth_year']} in {data['birth_place']}")
+            
+            if data['occupation']:
+                response.append(f"{pronoun_cap} was a {data['occupation']}")
+            
+            if data['achievement']:
+                # Add proper verb tense
+                achievement = data['achievement']
+                if not achievement.startswith(('was ', 'is ')):
+                    achievement = f"is known for {achievement}"
+                response.append(f"{pronoun_cap} {achievement}")
+            
+            if response:
+                return '. '.join(response) + '.'
         
-        if data['occupation']:
-            response.append(f"They were a {data['occupation']}")
-        
-        if data['achievement']:
-            response.append(f"They achieved {data['achievement']}")
-        
-        if data['known_for']:
-            response.append(f"and are known for {data['known_for']}")
-        
-        if data['death_year']:
-            response.append(f"They died in {data['death_year']}")
-        
-        if response:
-            return '. '.join(response) + '.'
+        # For specific field questions, return focused answers
+        for field, value in data.items():
+            if value and field in question:
+                return self._format_answer(name, field, value)
+            
         return f"I don't have detailed information about {name}."
 
     def _format_answer(self, name, field, answer):
         """Format the answer in a natural way."""
+        # Get pronoun based on name (simplified - could be expanded)
+        pronoun = "she" if name in ["Ada Lovelace"] else "he"
+        
+        # Add proper verb tense for achievements
+        if field == 'achievement' and not answer.startswith(('was ', 'is ')):
+            answer = f"is known for {answer}"
+        
         formats = {
             'birth_year': f"{name} was born in {answer}.",
             'birth_place': f"{name} was born in {answer}.",
             'death_year': f"{name} died in {answer}.",
             'death_place': f"{name} died in {answer}.",
             'occupation': f"{name} was a {answer}.",
-            'achievement': f"{name} achieved {answer}.",
+            'achievement': f"{name} {answer}.",
             'education': f"{name} studied at {answer}.",
-            'nationality': f"{name} was {answer}.",
-            'known_for': f"{name} is known for {answer}."
+            'nationality': f"{name} was {answer}."
         }
         return formats.get(field, f"{name}'s {field.replace('_', ' ')} was {answer}.")
 

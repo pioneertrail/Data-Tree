@@ -13,12 +13,14 @@ def test_biographical_agent():
     agent.add_person(
         name="Alan Turing",
         birth_year="1912",
+        birth_place="London, England",
         occupation="Computer Scientist",
         achievement="inventing the Turing machine, breaking the Enigma code, and pioneering artificial intelligence"
     )
     agent.add_person(
         name="Ada Lovelace",
         birth_year="1815",
+        birth_place="London, England",
         occupation="Mathematician",
         achievement="writing the first computer program and recognizing that computers could go beyond mere calculation"
     )
