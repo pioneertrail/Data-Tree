@@ -237,4 +237,168 @@ class BiographicalMemory:
         """Get average performance metrics."""
         store_rate = sum(self.metrics['store']) / len(self.metrics['store']) if self.metrics['store'] else 0
         retrieve_rate = sum(self.metrics['retrieve']) / len(self.metrics['retrieve']) if self.metrics['retrieve'] else 0
-        return {'store_rate': store_rate, 'retrieve_rate': retrieve_rate} 
+        return {'store_rate': store_rate, 'retrieve_rate': retrieve_rate}
+
+class AirQualityMemory:
+    def __init__(self, db_path=":memory:"):
+        """Initialize the air quality memory system.
+        
+        Args:
+            db_path (str): Path to SQLite database file
+        """
+        self.db_path = db_path
+        self.connection = self._create_connection()
+        self._initialize_db()
+
+    def _create_connection(self):
+        """Create an optimized SQLite connection."""
+        connection = sqlite3.connect(self.db_path)
+        connection.execute("PRAGMA journal_mode=WAL")  # Write-Ahead Logging
+        connection.execute("PRAGMA synchronous=NORMAL")  # Faster synchronization
+        connection.execute("PRAGMA cache_size=-64000")  # 64MB cache
+        connection.execute("PRAGMA temp_store=MEMORY")  # Store temp tables in memory
+        return connection
+
+    def _initialize_db(self):
+        """Initialize the database schema."""
+        cursor = self.connection.cursor()
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS air_quality (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                city TEXT NOT NULL,
+                region TEXT NOT NULL,
+                year INTEGER NOT NULL,
+                month INTEGER NOT NULL,
+                day INTEGER NOT NULL,
+                station_id TEXT NOT NULL,
+                pm25 REAL,
+                pm25_trend TEXT,
+                pm10 REAL,
+                so2 REAL,
+                monthly_avg REAL,
+                frequency TEXT,
+                timestamp TEXT NOT NULL
+            )
+        """)
+        self.connection.commit()
+
+    def store(self, data_string, timestamp):
+        """Store air quality data.
+        
+        Args:
+            data_string (str): Comma-separated data string
+            timestamp (str): ISO format timestamp
+        """
+        # Parse data string
+        parts = data_string.split(',')
+        if len(parts) != 12:
+            raise ValueError("Invalid data string format")
+
+        cursor = self.connection.cursor()
+        cursor.execute("""
+            INSERT INTO air_quality (
+                city, region, year, month, day, station_id,
+                pm25, pm25_trend, pm10, so2, monthly_avg, frequency,
+                timestamp
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """, parts + [timestamp])
+        self.connection.commit()
+
+    def retrieve(self, path):
+        """Retrieve data based on query path.
+        
+        Args:
+            path (list): Query path components
+            
+        Returns:
+            str: Query result
+        """
+        cursor = self.connection.cursor()
+        
+        if path[0] == "Pollutant Levels":
+            pollutant = path[1].lower().replace('.', '')
+            cursor.execute(f"""
+                SELECT {pollutant}, timestamp 
+                FROM air_quality 
+                ORDER BY timestamp DESC 
+                LIMIT 1
+            """)
+            result = cursor.fetchone()
+            return f"Latest {path[1]} level: {result[0]}" if result else "No recent data available"
+
+        elif path[0] == "Aggregates":
+            cursor.execute("""
+                SELECT AVG(pm25) 
+                FROM air_quality
+            """)
+            result = cursor.fetchone()
+            avg_value = result[0] if result and result[0] is not None else 0
+            return f"Average PM2.5 level: {avg_value:.2f}"
+
+        elif path[0] == "Metadata":
+            if path[1] == "City":
+                cursor.execute("SELECT DISTINCT city FROM air_quality")
+                cities = cursor.fetchall()
+                return "Monitored cities: " + ", ".join(city[0] for city in cities) if cities else "No cities monitored"
+            elif path[1] == "Date":
+                cursor.execute("SELECT timestamp FROM air_quality ORDER BY timestamp DESC LIMIT 1")
+                result = cursor.fetchone()
+                return f"Latest data from: {result[0]}" if result else "No data available"
+
+        elif path[0] == "Trends":
+            cursor.execute("""
+                SELECT pm25_trend, timestamp 
+                FROM air_quality 
+                ORDER BY timestamp DESC 
+                LIMIT 1
+            """)
+            result = cursor.fetchone()
+            return f"Current PM2.5 trend: {result[0]}" if result else "No trend data available"
+
+        elif path[0] == "City Data":
+            city = path[1]
+            cursor.execute("""
+                SELECT pm25, pm10, so2, timestamp 
+                FROM air_quality 
+                WHERE city = ? 
+                ORDER BY timestamp DESC 
+                LIMIT 1
+            """, (city,))
+            result = cursor.fetchone()
+            if result:
+                return (f"Air quality in {city}:\n"
+                       f"  PM2.5: {result[0]:.1f} µg/m³\n"
+                       f"  PM10:  {result[1]:.1f} µg/m³\n"
+                       f"  SO2:   {result[2]:.1f} µg/m³\n"
+                       f"As of: {result[3]}")
+            return f"No recent data available for {city}"
+
+        return "No data found for that query"
+    
+    def get_history(self, start_date=None, end_date=None):
+        """Retrieve historical data within a date range.
+        
+        Args:
+            start_date (str, optional): Start date in ISO format
+            end_date (str, optional): End date in ISO format
+            
+        Returns:
+            list: Historical data points
+        """
+        cursor = self.connection.cursor()
+        query = "SELECT * FROM air_quality"
+        params = []
+        
+        if start_date or end_date:
+            query += " WHERE "
+            if start_date:
+                query += "timestamp >= ?"
+                params.append(start_date)
+            if end_date:
+                query += " AND " if start_date else ""
+                query += "timestamp <= ?"
+                params.append(end_date)
+                
+        query += " ORDER BY timestamp"
+        cursor.execute(query, params)
+        return cursor.fetchall() 

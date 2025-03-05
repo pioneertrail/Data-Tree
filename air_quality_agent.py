@@ -70,18 +70,28 @@ class AirQualityAgent:
         Returns:
             list: Path components for tree traversal
         """
+        request = request.lower()
+        
+        # City-specific queries
+        if "in" in request:
+            for city in ["beijing", "shanghai"]:
+                if city in request:
+                    return ["City Data", city.title()]
+        
         # Basic query parsing
-        if "pm2.5" in request:
-            if "average" in request or "avg" in request:
-                return ["Aggregates", "PM2.5", "Value"]
-            return ["Pollutant Levels", "PM2.5", "Value"]
-        elif "pm10" in request:
+        if "pm2.5" in request or "pm 2.5" in request:
+            if "trend" in request:
+                return ["Trends", "PM2.5"]
+            elif "average" in request or "avg" in request:
+                return ["Aggregates", "PM2.5"]
+            return ["Pollutant Levels", "PM2.5"]
+        elif "pm10" in request or "pm 10" in request:
             return ["Pollutant Levels", "PM10"]
         elif "so2" in request:
             return ["Pollutant Levels", "SO2"]
-        elif "city" in request:
-            return ["Metadata", "City", "Name"]
-        elif "date" in request:
+        elif any(word in request for word in ["cities", "monitored", "monitoring"]):
+            return ["Metadata", "City"]
+        elif "date" in request or "latest" in request:
             return ["Metadata", "Date"]
         
         return None
@@ -99,24 +109,38 @@ class AirQualityAgent:
         return self.memory.get_history(start_date, end_date)
 
     def analyze_trends(self, pollutant, days=30):
-        """Analyze trends for a specific pollutant.
-        
-        Args:
-            pollutant (str): Pollutant name (e.g., "PM2.5")
-            days (int): Number of days to analyze
-            
-        Returns:
-            dict: Trend analysis results
-        """
+        """Analyze trends for a specific pollutant."""
         history = self.get_historical_data()
-        # This is a placeholder for trend analysis
-        # In a real implementation, we would:
-        # 1. Extract pollutant values from history
-        # 2. Calculate moving averages
-        # 3. Detect patterns and anomalies
-        # 4. Return insights
+        if not history:
+            return {
+                "status": "No data available for analysis",
+                "pollutant": pollutant,
+                "period": f"{days} days"
+            }
+        
+        values = [row[7] if pollutant == "PM2.5" else row[9] if pollutant == "PM10" else row[10] 
+                  for row in history]
+        
+        current = values[-1]
+        avg = sum(values) / len(values)
+        trend = "increasing" if current > avg else "decreasing" if current < avg else "stable"
+        
         return {
             "pollutant": pollutant,
-            "period": f"{days} days",
-            "status": "Analysis not implemented yet"
-        } 
+            "period": f"{len(values)} days",
+            "current_value": f"{current:.1f} µg/m³",
+            "average": f"{avg:.1f} µg/m³",
+            "trend": trend,
+            "samples": len(values)
+        }
+
+    def _format_trend_output(self, trend_data):
+        """Format trend analysis output."""
+        return (
+            f"Trend Analysis for {trend_data['pollutant']}:\n"
+            f"  Period: {trend_data['period']}\n"
+            f"  Current: {trend_data['current_value']}\n"
+            f"  Average: {trend_data['average']}\n"
+            f"  Trend: {trend_data['trend'].title()}\n"
+            f"  Samples: {trend_data['samples']}"
+        ) 
