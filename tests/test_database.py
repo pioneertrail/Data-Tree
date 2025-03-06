@@ -2,6 +2,17 @@ import unittest
 import sqlite3
 import os
 from memory_manager import BiographicalMemory
+from functools import wraps
+
+def test_category(*categories):
+    """Decorator to assign categories to test methods"""
+    def decorator(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            return func(*args, **kwargs)
+        wrapper.test_categories = set(categories)
+        return wrapper
+    return decorator
 
 class TestBiographicalMemory(unittest.TestCase):
     def setUp(self):
@@ -36,6 +47,7 @@ class TestBiographicalMemory(unittest.TestCase):
             except PermissionError:
                 pass
 
+    @test_category('core', 'storage')
     def test_database_creation(self):
         """Test that database and table are created correctly."""
         conn = sqlite3.connect(self.test_db)
@@ -151,6 +163,7 @@ class TestBiographicalMemory(unittest.TestCase):
             1815
         )
 
+    @test_category('core', 'concurrent')
     def test_concurrent_access(self):
         """Test database handles concurrent access correctly."""
         import threading

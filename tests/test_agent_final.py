@@ -30,4 +30,15 @@ def test_biographical_agent():
         "What was Ada's occupation?",
         "What did Lovelace achieve?",
         "Tell me about Alan Turing",
-        "Who was Ada
+        "Who was Ada"
+    ]
+
+    for question in test_questions:
+        print(f"Question: {question}")
+        answer = agent.query(question)
+        print(f"Answer: {answer}\n")
+
+    print("✓ All queries answered\n")
+
+if __name__ == "__main__":
+    test_biographical_agent()

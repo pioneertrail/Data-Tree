@@ -10,13 +10,13 @@ def test_biographical_memory():
     # Test data
     turing_data = {
         'name': 'Alan Turing',
-        'birth_year': '1912',
+        'birth_year': 1912,
         'occupation': 'Computer Scientist'
     }
     
     lovelace_data = {
         'name': 'Ada Lovelace',
-        'birth_year': '1815',
+        'birth_year': 1815,
         'occupation': 'Mathematician'
     }
     
@@ -32,7 +32,7 @@ def test_biographical_memory():
     # Test Turing data
     birth_year = memory.retrieve('Alan Turing', 'birth_year')
     print(f"Turing birth year: {birth_year}")
-    assert birth_year == '1912', "Wrong birth year for Turing"
+    assert birth_year == 1912, "Wrong birth year for Turing"
     
     occupation = memory.retrieve('Alan Turing', 'occupation')
     print(f"Turing occupation: {occupation}")
@@ -41,7 +41,7 @@ def test_biographical_memory():
     # Test Lovelace data
     birth_year = memory.retrieve('Ada Lovelace', 'birth_year')
     print(f"Lovelace birth year: {birth_year}")
-    assert birth_year == '1815', "Wrong birth year for Lovelace"
+    assert birth_year == 1815, "Wrong birth year for Lovelace"
     
     occupation = memory.retrieve('Ada Lovelace', 'occupation')
     print(f"Lovelace occupation: {occupation}")
