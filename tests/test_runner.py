@@ -1,5 +1,6 @@
 import unittest
 import sys
+import time
 from collections import defaultdict
 from colorama import init, Fore, Style
 
@@ -10,12 +11,22 @@ class ColorTestResult(unittest.TextTestResult):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.tests_by_class = defaultdict(list)
+        self.test_times = {}
 
     def startTest(self, test):
+        self._started_at = time.time()
         super().startTest(test)
         class_name = test.__class__.__name__
         test_name = test._testMethodName
         self.tests_by_class[class_name].append((test_name, True))  # True = passed by default
+
+    def stopTest(self, test):
+        elapsed = time.time() - self._started_at
+        self.test_times[f"{test.__class__.__name__}.{test._testMethodName}"] = elapsed
+        if elapsed > 1.0:
+            self.stream.write(f" {Fore.YELLOW}({elapsed:.2f}s ⚠){Style.RESET_ALL}")
+        else:
+            self.stream.write(f" {Fore.BLUE}({elapsed:.2f}s){Style.RESET_ALL}")
 
     def addError(self, test, err):
         self.stream.write(f'{Fore.RED}E{Style.RESET_ALL} ')
@@ -62,10 +73,14 @@ class ColorTestRunner(unittest.TextTestRunner):
 
         print(f"\n{Fore.CYAN}=== Test Breakdown ==={Style.RESET_ALL}")
         for class_name, tests in sorted(result.tests_by_class.items()):
-            print(f"\n{Fore.YELLOW}{class_name}:{Style.RESET_ALL}")
+            total_class_time = sum(result.test_times.get(f"{class_name}.{test_name}", 0) 
+                                 for test_name, _ in tests)
+            print(f"\n{Fore.YELLOW}{class_name}{Style.RESET_ALL} ({total_class_time:.2f}s total):")
             for test_name, passed in sorted(tests):
                 status = f"{Fore.GREEN}✓{Style.RESET_ALL}" if passed else f"{Fore.RED}✗{Style.RESET_ALL}"
-                print(f"  {status} {test_name}")
+                time_taken = result.test_times.get(f"{class_name}.{test_name}", 0)
+                time_color = Fore.YELLOW if time_taken > 1.0 else Fore.BLUE
+                print(f"  {status} {test_name} {time_color}({time_taken:.2f}s){Style.RESET_ALL}")
 
 def run_tests():
     loader = unittest.TestLoader()
