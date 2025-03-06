@@ -31,8 +31,9 @@ env/
 *.swp
 *.swo
 
-# Database
+# Test files
 *.db
+*.sqlite
 *.sqlite3
 
 # Logs
