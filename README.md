@@ -139,4 +139,40 @@ Tests include:
 - WAL journaling mode
 - Memory-mapped I/O
 - Optimized cache settings
-- Index on name field for fast lookups 
+- Index on name field for fast lookups
+
+## Running Tests
+
+### Quick Start
+To run all tests with the colored output:
+```python -m tests.test_runner```
+
+### Test Output
+The test runner provides:
+- Real-time colored status indicators (✓ for pass, ✗ for fail)
+- Detailed debug and performance metrics during test execution
+- Summary statistics showing total tests and pass/fail counts
+- Organized breakdown of tests by class
+
+### Test Organization
+Tests are organized into several categories:
+- BiographicalMemory: Core database operations and concurrency
+- AirQualityMemory: Specialized data validation and storage
+- BackupManager: Database backup and restore functionality
+- ConnectionPool: Connection management and pooling
+- DatabaseInitializer: Schema and constraint management
+- Performance: Database operation benchmarks and scaling tests
+
+### Debug Output
+Debug messages are preserved in the output to help diagnose:
+- Database initialization and cleanup
+- Connection management
+- Performance metrics
+- Concurrent operation behavior
+
+Would you like me to:
+1. Create a separate TESTING.md with more detailed documentation?
+2. Add examples of common testing scenarios?
+3. Include troubleshooting tips?
+
+Let me know which aspects you'd like to focus on in the documentation! 
