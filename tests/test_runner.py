@@ -26,6 +26,7 @@ class ColorTestResult(unittest.runner.TextTestResult):
         self.use_colors = not no_color
         self.tests_by_class = defaultdict(list)
         self.test_times = {}
+        self.test_docs = {}  # Store test docstrings
         
         if self.quiet:
             logging.getLogger().setLevel(logging.WARNING)
@@ -41,6 +42,10 @@ class ColorTestResult(unittest.runner.TextTestResult):
         class_name = test.__class__.__name__
         test_name = test._testMethodName
         self.tests_by_class[class_name].append((test_name, True))
+        
+        # Store the test's docstring
+        doc = test._testMethodDoc or "No description provided"
+        self.test_docs[f"{class_name}.{test_name}"] = doc.strip()
 
     def stopTest(self, test):
         elapsed = time.time() - self._started_at
@@ -111,14 +116,23 @@ class ColorTestRunner(unittest.TextTestRunner):
             total_class_time = sum(result.test_times.get(f"{class_name}.{test_name}", 0) 
                                  for test_name, _ in tests)
             self.stream.writeln(f"\n{Fore.YELLOW if self.use_colors else ''}{class_name}{Style.RESET_ALL if self.use_colors else ''} ({total_class_time:.2f}s total):")
+            
             for test_name, passed in sorted(tests):
                 status = f"{Fore.GREEN if self.use_colors else ''}✓{Style.RESET_ALL if self.use_colors else ''}" if passed else f"{Fore.RED if self.use_colors else ''}✗{Style.RESET_ALL if self.use_colors else ''}"
                 time_taken = result.test_times.get(f"{class_name}.{test_name}", 0)
                 time_color = Fore.YELLOW if time_taken > 1.0 else Fore.BLUE
+                
+                # Get the test's docstring
+                doc = result.test_docs.get(f"{class_name}.{test_name}", "").split('\n')[0]  # First line only
+                
                 if self.use_colors:
                     self.stream.writeln(f"  {status} {test_name} {time_color}({time_taken:.2f}s){Style.RESET_ALL}")
+                    if doc:  # Only show docstring if it exists
+                        self.stream.writeln(f"    {Fore.WHITE}{doc}{Style.RESET_ALL}")
                 else:
                     self.stream.writeln(f"  {status} {test_name} ({time_taken:.2f}s)")
+                    if doc:
+                        self.stream.writeln(f"    {doc}")
 
 def run_tests():
     args = parse_args()
