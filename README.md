@@ -1,58 +1,37 @@
-# Biographical Memory Database
+# ZeroLag - High-Performance Pattern Engine
 
-A high-performance, thread-safe SQLite-based biographical data storage system with concurrent operation support.
+ZeroLag is a high-performance pattern storage and analysis engine built with Flask, featuring real-time visualization and customizable styling.
 
-## Performance Metrics
-- Single Record Retrieval: 1,274 operations/second
-- Batch Operations: 34,000+ records/second
-- Concurrent Operations: 2,700+ operations/second
-- Memory Efficient: ~200KB for 1000 records
+![ZeroLag Interface](docs/images/interface.png)
 
 ## Features
-- Thread-safe database operations
-- Optimized SQLite configuration
-- High-performance batch operations
-- Comprehensive test suite
-- Memory-efficient storage
-- Clean resource management
 
-## Installation
-```bash
-git clone https://github.com/pioneertrail/biographical-memory
-cd biographical-memory
-pip install -r requirements.txt
-```
+- 🚀 High-speed binary pattern storage and retrieval
+- 📊 Real-time performance metrics and visualizations
+- 🎨 Customizable dark-mode interface
+- 📈 Pattern analysis and distribution tracking
+- ⚡ Quick pattern operations
+- 🔄 Dynamic CSS theme support
 
 ## Quick Start
-```python
-from memory_manager import BiographicalMemory
 
-# Initialize database
-db = BiographicalMemory("bio_data.db")
+```bash
+# Clone the repository
+git clone https://github.com/yourusername/zerolag.git
+cd zerolag
 
-# Store a record
-person = {
-    'name': 'John Doe',
-    'age': 30,
-    'occupation': 'Engineer',
-    'bio': 'Experienced software developer'
-}
-person_id = db.store(person['name'], person)
+# Create and activate virtual environment
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
 
-# Batch store records
-people = [generate_person() for _ in range(1000)]
-ids = db.batch_store(people)
+# Install dependencies
+pip install -r requirements.txt
 
-# Retrieve records
-person = db.retrieve(person_id)
-batch = db.batch_retrieve(ids)
-
-# Clean up
-db.close()
+# Run the application
+python app.py
 ```
 
-## Benchmarks
-See [BENCHMARKS.md](docs/BENCHMARKS.md) for detailed performance metrics.
+Visit `http://127.0.0.1:5000` in your browser.
 
 ## Project Structure
 
