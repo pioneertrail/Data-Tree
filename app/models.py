@@ -1,4 +1,4 @@
-"""Database models."""
+"""Database models for the AI Educational Assistant."""
 from datetime import datetime
 from enum import Enum
 import json
@@ -143,17 +143,15 @@ class LearningProfile(db.Model):
         return f'<LearningProfile {self.student_id}>'
 
 class Teacher(db.Model):
-    """Teacher model for storing teacher information."""
+    """Teacher model for managing multiple AI teachers."""
     __tablename__ = 'teachers'
     
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
-    specialty = db.Column(db.String(50))
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    
+    specialty = db.Column(db.String(100))
+
     # Relationships
-    students = db.relationship('User', backref='teacher', lazy=True)
-    interactions = db.relationship('Interaction', backref='teacher', lazy=True)
+    groups = db.relationship('Group', backref='teacher', lazy=True)
     lesson_plans = db.relationship('LessonPlan', backref='teacher', lazy=True)
     suggestions = db.relationship('Suggestion', backref='teacher', lazy=True)
 
@@ -161,171 +159,141 @@ class Teacher(db.Model):
         return {
             'id': self.id,
             'name': self.name,
-            'specialty': self.specialty,
-            'created_at': self.created_at.isoformat()
+            'specialty': self.specialty
         }
 
 class User(db.Model):
-    """User model for storing student information."""
+    """User model for students."""
     __tablename__ = 'users'
     
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100), nullable=False)
-    email = db.Column(db.String(100))
-    age = db.Column(db.Integer)
-    sex = db.Column(db.String(20))
-    location = db.Column(db.String(100))
-    religion = db.Column(db.String(50))
-    learning_style = db.Column(db.String(50))
-    language = db.Column(db.String(50))
-    disabilities = db.Column(db.String(100))
-    aha_count = db.Column(db.Integer, default=0)
-    teacher_id = db.Column(db.Integer, db.ForeignKey('teachers.id'))
+    username = db.Column(db.String(80), unique=True, nullable=False)
+    email = db.Column(db.String(120), unique=True, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     
     # Relationships
     interactions = db.relationship('Interaction', backref='user', lazy=True)
     progress = db.relationship('SubjectProgress', backref='user', lazy=True)
-    lesson_plans = db.relationship('LessonPlan', backref='user', lazy=True)
+    group_id = db.Column(db.Integer, db.ForeignKey('groups.id'))
 
     def to_dict(self):
         return {
             'id': self.id,
-            'name': self.name,
+            'username': self.username,
             'email': self.email,
-            'age': self.age,
-            'sex': self.sex,
-            'location': self.location,
-            'religion': self.religion,
-            'learning_style': self.learning_style,
-            'language': self.language,
-            'disabilities': self.disabilities,
-            'aha_count': self.aha_count,
-            'teacher_id': self.teacher_id,
-            'created_at': self.created_at.isoformat()
+            'created_at': self.created_at.isoformat(),
+            'updated_at': self.updated_at.isoformat()
         }
 
 class Interaction(db.Model):
-    """Interaction model for storing all types of interactions."""
+    """Model for tracking all interactions including 'aha moments'."""
     __tablename__ = 'interactions'
     
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
-    teacher_id = db.Column(db.Integer, db.ForeignKey('teachers.id'), nullable=False)
-    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
-    is_private = db.Column(db.Boolean, default=False)
     content = db.Column(db.Text, nullable=False)
-    type = db.Column(db.String(50), nullable=False)
-    subject = db.Column(db.String(50))
-    aha_trigger = db.Column(db.String(100))
-    aha_confidence = db.Column(db.Float)
-    
+    response = db.Column(db.Text, nullable=False)
+    topic_area = db.Column(db.String(50))
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
     def to_dict(self):
         return {
             'id': self.id,
             'user_id': self.user_id,
-            'teacher_id': self.teacher_id,
-            'timestamp': self.timestamp.isoformat(),
-            'is_private': self.is_private,
             'content': self.content,
-            'type': self.type,
-            'subject': self.subject,
-            'aha_trigger': self.aha_trigger,
-            'aha_confidence': self.aha_confidence
+            'response': self.response,
+            'topic_area': self.topic_area,
+            'created_at': self.created_at.isoformat()
         }
 
 class SubjectProgress(db.Model):
-    """Subject progress model for tracking student progress."""
+    """Model for tracking student progress in each subject."""
     __tablename__ = 'subject_progress'
     
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     subject = db.Column(db.String(50), nullable=False)
-    progress_level = db.Column(db.String(50))
-    goals_achieved = db.Column(db.Text)
+    level = db.Column(db.Integer, default=1)
+    progress = db.Column(db.Float, default=0.0)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
-    
+
     def to_dict(self):
         return {
             'id': self.id,
             'user_id': self.user_id,
             'subject': self.subject,
-            'progress_level': self.progress_level,
-            'goals_achieved': json.loads(self.goals_achieved) if self.goals_achieved else [],
+            'level': self.level,
+            'progress': self.progress,
+            'created_at': self.created_at.isoformat(),
             'updated_at': self.updated_at.isoformat()
         }
 
 class LessonPlan(db.Model):
-    """Lesson plan model for storing lesson details."""
+    """Model for managing lesson plans."""
     __tablename__ = 'lesson_plans'
     
     id = db.Column(db.Integer, primary_key=True)
     teacher_id = db.Column(db.Integer, db.ForeignKey('teachers.id'), nullable=False)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
-    date = db.Column(db.Date, nullable=False)
-    subject = db.Column(db.String(50), nullable=False)
+    title = db.Column(db.String(200), nullable=False)
     content = db.Column(db.Text, nullable=False)
-    goal = db.Column(db.String(50), nullable=False)
-    aha_strategy = db.Column(db.String(100))
+    subject = db.Column(db.String(50))
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
     def to_dict(self):
         return {
             'id': self.id,
             'teacher_id': self.teacher_id,
-            'user_id': self.user_id,
-            'date': self.date.isoformat(),
-            'subject': self.subject,
+            'title': self.title,
             'content': self.content,
-            'goal': self.goal,
-            'aha_strategy': self.aha_strategy,
-            'created_at': self.created_at.isoformat()
+            'subject': self.subject,
+            'created_at': self.created_at.isoformat(),
+            'updated_at': self.updated_at.isoformat()
         }
 
 class Group(db.Model):
-    """Group model for storing collaborative tasks."""
+    """Model for managing group activities."""
     __tablename__ = 'groups'
     
     id = db.Column(db.Integer, primary_key=True)
-    user_ids = db.Column(db.Text, nullable=False)  # Comma-separated list of user IDs
-    task = db.Column(db.Text, nullable=False)
-    subject = db.Column(db.String(50), nullable=False)
-    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+    name = db.Column(db.String(100), nullable=False)
+    teacher_id = db.Column(db.Integer, db.ForeignKey('teachers.id'), nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     
-    def get_user_ids(self):
-        """Convert comma-separated string to list of integers."""
-        return [int(uid) for uid in self.user_ids.split(',')]
-    
-    def set_user_ids(self, user_ids):
-        """Convert list of integers to comma-separated string."""
-        self.user_ids = ','.join(str(uid) for uid in user_ids)
-    
+    # Relationships
+    users = db.relationship('User', backref='group', lazy=True)
+
     def to_dict(self):
         return {
             'id': self.id,
-            'user_ids': self.get_user_ids(),
-            'task': self.task,
-            'subject': self.subject,
-            'timestamp': self.timestamp.isoformat()
+            'name': self.name,
+            'teacher_id': self.teacher_id,
+            'created_at': self.created_at.isoformat(),
+            'updated_at': self.updated_at.isoformat()
         }
 
 class Suggestion(db.Model):
-    """Suggestion model for storing AI improvement suggestions."""
+    """Model for AI-generated system improvement suggestions."""
     __tablename__ = 'suggestions'
     
     id = db.Column(db.Integer, primary_key=True)
     teacher_id = db.Column(db.Integer, db.ForeignKey('teachers.id'), nullable=False)
-    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
     content = db.Column(db.Text, nullable=False)
-    status = db.Column(db.String(20), default='Pending')
-    
+    implemented = db.Column(db.Boolean, default=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
     def to_dict(self):
         return {
             'id': self.id,
             'teacher_id': self.teacher_id,
-            'timestamp': self.timestamp.isoformat(),
             'content': self.content,
-            'status': self.status
+            'implemented': self.implemented,
+            'created_at': self.created_at.isoformat(),
+            'updated_at': self.updated_at.isoformat()
         }
 
 class LearningStyle(str, Enum):

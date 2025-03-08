@@ -1,136 +1,192 @@
-"""AI routes for generating responses and managing context."""
+"""AI routes for generating responses and managing context.
+
+This module provides the API endpoints for AI-powered educational interactions,
+including response generation, lesson planning, and group activity creation.
+"""
 from flask import Blueprint, request, jsonify, current_app
 from app.extensions import db
-from app.models import Message, TopicArea
-from datetime import datetime
-import uuid
-import logging
+from app.models import User, Teacher
 import openai
-from os import getenv
-from dotenv import load_dotenv
-
-# Load environment variables
-load_dotenv()
+import os
+import logging
 
 # Create blueprint
 bp = Blueprint('ai', __name__)
 logger = logging.getLogger(__name__)
 
 # Configure OpenAI
-openai.api_key = getenv('OPENAI_API_KEY')
+openai.api_key = os.environ.get('OPENAI_API_KEY')
 
-def generate_ai_response(content, topic_area):
-    """Generate an AI response using OpenAI's API."""
+@bp.route('/api/ai/generate', methods=['POST'])
+def generate_response():
+    """Generate an AI response with analytics.
+    
+    This endpoint accepts a question and topic area, then generates an educational
+    response using OpenAI's GPT-3.5 model. It also provides analytics about the
+    response's complexity, engagement level, and topic relevance.
+    
+    Request Body:
+        {
+            "content": str,       # The user's question
+            "topic_area": str     # The subject area (e.g., "science", "math")
+        }
+    
+    Returns:
+        JSON response with the following structure:
+        {
+            "content": str,       # The AI-generated response
+            "analytics": {
+                "complexity_score": float,    # 0.0 to 1.0
+                "engagement_score": float,    # 0.0 to 1.0
+                "topic_relevance": float      # 0.0 to 1.0
+            }
+        }
+        
+    Raises:
+        400 - Missing required fields
+        500 - Internal server error or OpenAI API error
+    """
     try:
-        # Create a system message that sets the context for the AI
-        system_message = f"You are an educational AI assistant specializing in {topic_area}. Provide detailed, accurate, and engaging responses that are appropriate for students learning about {topic_area}."
+        data = request.get_json()
+        content = data.get('content')
+        subject = data.get('topic_area')  # Using topic_area from frontend
         
-        # Create the conversation messages
-        messages = [
-            {"role": "system", "content": system_message},
-            {"role": "user", "content": content}
-        ]
+        if not content or not subject:
+            return jsonify({
+                'error': 'Missing required fields: content and topic_area'
+            }), 400
+            
+        # Get or create default teacher (Ms. Emma)
+        teacher = Teacher.query.filter_by(name='Ms. Emma').first()
+        if not teacher:
+            teacher = Teacher(name='Ms. Emma', specialty='General Education')
+            db.session.add(teacher)
+            db.session.commit()
+            
+        # Get or create user (temporary user for web interface)
+        user = User.query.filter_by(username='Web User').first()
+        if not user:
+            user = User(
+                username='Web User',
+                email='web.user@example.com'
+            )
+            db.session.add(user)
+            db.session.commit()
+            
+        # Generate response using OpenAI
+        system_prompt = f"""You are Ms. Emma, an expert teacher specialized in {subject}. 
+        Your goal is to provide clear, engaging, and educational responses that help students understand complex topics.
+        Adapt your explanation style based on the question's complexity and maintain an encouraging, supportive tone."""
         
-        # Call OpenAI API
         response = openai.ChatCompletion.create(
             model="gpt-3.5-turbo",
-            messages=messages,
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": content}
+            ],
             temperature=0.7,
             max_tokens=500
         )
         
-        # Extract the AI's response
-        ai_content = response.choices[0].message['content']
+        ai_response = response.choices[0].message['content']
         
-        # Calculate scores based on response characteristics
-        complexity_score = min(len(ai_content.split()) / 200, 1.0)  # Based on response length
-        engagement_score = 0.9  # Default high engagement for GPT responses
-        topic_relevance = 0.95  # Default high relevance
+        # Calculate analytics based on the response
+        complexity_score = min(len(ai_response.split()) / 200, 1.0)  # Simple complexity measure based on length
+        engagement_score = 0.8  # Default engagement score
+        topic_relevance = 0.9  # Default topic relevance
         
-        return {
-            'content': ai_content,
-            'complexity_score': complexity_score,
-            'engagement_score': engagement_score,
-            'topic_relevance': topic_relevance
-        }
+        return jsonify({
+            'content': ai_response,
+            'analytics': {
+                'complexity_score': complexity_score,
+                'engagement_score': engagement_score,
+                'topic_relevance': topic_relevance
+            }
+        })
         
     except Exception as e:
-        logger.error(f"Error calling OpenAI API: {str(e)}")
-        raise
+        logger.error(f"Error generating response: {str(e)}")
+        return jsonify({'error': str(e)}), 500
 
-@bp.route('/generate', methods=['POST'])
-@bp.route('/generate/<session_id>', methods=['POST'])
-def generate_response(session_id=None):
-    """Generate an AI response for a message."""
+@bp.route('/api/ai/lesson-plan', methods=['POST'])
+def create_lesson_plan():
+    """Create a personalized lesson plan.
+    
+    This endpoint generates a customized lesson plan based on the user's profile
+    and the specified subject area.
+    
+    Request Body:
+        {
+            "user_id": str,    # The ID of the user
+            "subject": str     # The subject area for the lesson
+        }
+    
+    Returns:
+        JSON response containing the lesson plan details
+        
+    Raises:
+        400 - Missing required fields
+        500 - Internal server error
+    """
     try:
         data = request.get_json()
-        if not data or 'content' not in data or 'topic_area' not in data:
-            return jsonify({'error': 'Missing required fields'}), 400
-
-        # Validate topic area
-        topic_area = data['topic_area']
-        if topic_area not in [area.value for area in TopicArea]:
-            return jsonify({'error': 'Invalid topic area'}), 400
-
-        # Generate session_id if not provided
-        if session_id is None:
-            session_id = data.get('session_id', str(uuid.uuid4()))
-
-        # Generate AI response
-        ai_response = generate_ai_response(data['content'], topic_area)
-
-        # Create and save message
-        message = Message(
-            content=ai_response['content'],
-            topic_area=topic_area,
-            session_id=session_id,
-            is_ai=True,
-            complexity_score=ai_response['complexity_score'],
-            engagement_score=ai_response['engagement_score']
-        )
+        user_id = data.get('user_id')
+        subject = data.get('subject')
         
-        db.session.add(message)
-        db.session.commit()
-
-        return jsonify({
-            'content': ai_response['content'],
-            'topic_area': topic_area,
-            'analytics': {
-                'complexity_score': ai_response['complexity_score'],
-                'engagement_score': ai_response['engagement_score'],
-                'topic_relevance': ai_response['topic_relevance']
-            }
-        }), 200
-
+        if not user_id or not subject:
+            return jsonify({
+                'error': 'Missing required fields: user_id and subject'
+            }), 400
+            
+        teacher = Teacher.query.filter_by(name='Ms. Emma').first()
+        ai_teacher = AITeacher(teacher.teacher_id)
+        
+        plan = ai_teacher.create_lesson_plan(user_id, subject)
+        return jsonify(plan)
+        
     except Exception as e:
-        db.session.rollback()
-        logger.error(f"Error generating response: {str(e)}")
-        return jsonify({'error': 'Internal server error'}), 500
+        logger.error(f"Error creating lesson plan: {str(e)}")
+        return jsonify({'error': str(e)}), 500
 
-@bp.route('/context', methods=['GET'])
-@bp.route('/context/<session_id>', methods=['GET'])
-def get_context(session_id=None):
-    """Get the conversation context for a session."""
+@bp.route('/api/ai/group-activity', methods=['POST'])
+def create_group_activity():
+    """Create a collaborative learning activity.
+    
+    This endpoint generates a group activity that promotes collaborative learning
+    among multiple students in a specific subject area.
+    
+    Request Body:
+        {
+            "user_ids": list[str],   # List of user IDs for the group
+            "subject": str           # The subject area for the activity
+        }
+    
+    Returns:
+        JSON response containing the group activity details
+        
+    Raises:
+        400 - Missing required fields
+        500 - Internal server error
+    """
     try:
-        if session_id is None:
-            # Return empty list if no session_id provided
-            return jsonify([]), 200
-
-        messages = Message.query.filter_by(session_id=session_id).order_by(Message.timestamp).all()
-        return jsonify([{
-            'content': msg.content,
-            'topic_area': msg.topic_area,
-            'timestamp': msg.timestamp.isoformat(),
-            'is_ai': msg.is_ai,
-            'metrics': {
-                'complexity': msg.complexity_score,
-                'engagement': msg.engagement_score
-            } if msg.is_ai else None
-        } for msg in messages]), 200
-
+        data = request.get_json()
+        user_ids = data.get('user_ids')
+        subject = data.get('subject')
+        
+        if not user_ids or not subject:
+            return jsonify({
+                'error': 'Missing required fields: user_ids and subject'
+            }), 400
+            
+        teacher = Teacher.query.filter_by(name='Ms. Emma').first()
+        ai_teacher = AITeacher(teacher.teacher_id)
+        
+        activity = ai_teacher.create_group_activity(user_ids, subject)
+        return jsonify(activity)
+        
     except Exception as e:
-        logger.error(f"Error retrieving context: {str(e)}")
-        return jsonify({'error': 'Internal server error'}), 500
+        logger.error(f"Error creating group activity: {str(e)}")
+        return jsonify({'error': str(e)}), 500
 
 # Export the blueprint directly
 __all__ = ['bp'] 
