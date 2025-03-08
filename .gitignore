@@ -20,10 +20,12 @@ wheels/
 .installed.cfg
 *.egg
 
-# Virtual Environment
+# Environment variables
+.env
+.venv
+env/
 venv/
 ENV/
-env/
 
 # IDE
 .idea/
@@ -31,7 +33,7 @@ env/
 *.swp
 *.swo
 
-# Test files
+# Database
 *.db
 *.sqlite
 *.sqlite3

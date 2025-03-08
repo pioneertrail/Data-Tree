@@ -1,0 +1,1 @@
+@("app/app.py", "app/models.py", "app/templates/index.html", "app/static/css/style.css") | % { if (!(Test-Path $_)) { throw "Missing: $_" } }; python app/app.py 
